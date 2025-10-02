@@ -1,0 +1,9 @@
+# Ignorar todo
+*
+
+# Pero no ignorar estos dos archivos
+!TradAlg.slog
+!TradAlg-vc.slog
+
+# (Opcional) no ignores el propio .gitignore
+!.gitignore
