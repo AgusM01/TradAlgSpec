@@ -14,8 +14,6 @@ def_type(value, int).
 def_type(alpha, int).                                                  
 def_type(actions, rel(stock, [value, alpha])).                         
 
-% Preguntar si estan bien declarados estos tipos enumerados
-
 def_type(algstate, enum([checking, buying])).                           
 def_type(msj, enum([                                                    
     ok,
