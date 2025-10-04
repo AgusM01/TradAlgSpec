@@ -37,7 +37,7 @@ axm1(Delta) :- Delta > 0.
 
 axiom(axm2).                                                            
 dec_p_type(axm2(rel(set(value),value))).                                     
-axm2(SumSet) :- pfun(SumSet).                                           
+axm2(SumSet) :- pfun(SumSet) & let([A, K], (dec(A, set(value)) & applyTo(SumSet, A, K) & dec(K, value)), K >= 0).                                           
 
 axiom(axm3).                                                            
 dec_p_type(axm3(rel(actions,set(stock)))).                              
@@ -75,8 +75,11 @@ initAlg(MarketActions, ActualActions, NetWorth, State, Check) :-
 
 dec_p_type(actActionsOk(set(stock), algstate, int, actions, actions, set(stock), value, algstate, int, msj, rel(set(value), value), int)).
 actActionsOk(ActualActions, State, Check, NewMktActions, MarketActions_, ActualActions_, NetWorth_, State_, Check_, Msj, SumSet, Delta)  :-
-    State = checking &
     
+    pfun(NewMktActions) & 
+    
+    State = checking & 
+
     % #NewMktActions? >= 3
     let([SMKT],
         ( size(NewMktActions, SMKT) & dec(SMKT, int) ),
@@ -86,15 +89,16 @@ actActionsOk(ActualActions, State, Check, NewMktActions, MarketActions_, ActualA
     MarketActions_ = NewMktActions &
     ActualActions_ = ActualActions &
     
-    % NetWorth' = SumSet (dom (ran ( ActualActions <| MarketActions')))
+    % NetWorth' = SumSet (dom (ran ( ActualActions <| MarketActions'))) 
     let([S, R, D],
     (dres(ActualActions, MarketActions_, S) &
     dec(S, actions) &
     ran(S, R) &
     dec(R, set([value,alpha])) &
     dom(R, D) &
-    dec(D, set(value))),
-    applyTo(SumSet, D, NetWorth_)) &
+    dec(D, set(value))) &
+    applyTo(SumSet, D, NetWorth_),
+    NetWorth_ >= 0) &
     
     State_ = State &
     Check_ = Check + 1 &
@@ -103,6 +107,8 @@ actActionsOk(ActualActions, State, Check, NewMktActions, MarketActions_, ActualA
 %ActActionsErrorBuyInProgress
 dec_p_type(actActionsErrorBuyInProgress(actions, algstate, int, msj, int)).
 actActionsErrorBuyInProgress(NewMktActions, State, Check, Msj, Delta) :-
+    pfun(NewMktActions) & 
+
     State = buying &
     Check =< Delta &
     let([SMKT],
@@ -113,6 +119,8 @@ actActionsErrorBuyInProgress(NewMktActions, State, Check, Msj, Delta) :-
 %ActActionsErrorGettingActions
 dec_p_type(actActionsErrorGettingActions(actions, algstate, int, msj, int)).
 actActionsErrorGettingActions(NewMktActions, State, Check, Msj, Delta) :-
+    pfun(NewMktActions) & 
+
     State = checking &
     Check =< Delta &
     let([SMKT],
@@ -123,6 +131,8 @@ actActionsErrorGettingActions(NewMktActions, State, Check, Msj, Delta) :-
 %ActActionsErrorTimeToCheck
 dec_p_type(actActionsErrorTimeToCheck(actions, algstate, int, msj, int)).
 actActionsErrorTimeToCheck(NewMktActions, State, Check, Msj, Delta) :-
+    pfun(NewMktActions) & 
+
     State = checking &
     Check > Delta &
     let([SMKT],
