@@ -46,7 +46,7 @@ axioms_sat :-
 
 initAlg_sat_invAlg :-
   initAlg(MarketActions,ActualActions,NetWorth,State,Check) &
-  invAlg(MarketActions,ActualActions,NetWorth,Check,SumSet).
+  invAlg(MarketActions,NetWorth,Check).
 
 initAlg_sat_invAct :-
   initAlg(MarketActions,ActualActions,NetWorth,State,Check) &
@@ -56,12 +56,12 @@ actActions_is_sat :-
   actActions(MarketActions,ActualActions,State,Check,NetWorth,NewMktActions,MarketActions_,ActualActions_,NetWorth_,State_,Check_,Msj,SumSet,Delta) & 
   delay([MarketActions,ActualActions,NetWorth,State,Check] neq [MarketActions_,ActualActions_,NetWorth_,State_,Check_],false).
 
-actActions_pi_invAlg(MarketActions,ActualActions,NetWorth,Check,SumSet,MarketActions,ActualActions,State,Check,NetWorth,NewMktActions,MarketActions_,ActualActions_,NetWorth_,State_,Check_,Msj,SumSet,Delta) :-
+actActions_pi_invAlg(MarketActions,NetWorth,Check,MarketActions,ActualActions,State,Check,NetWorth,NewMktActions,MarketActions_,ActualActions_,NetWorth_,State_,Check_,Msj,SumSet,Delta) :-
   % here conjoin other ax/inv as hypotheses if necessary
   neg(
-    invAlg(MarketActions,ActualActions,NetWorth,Check,SumSet) &
+    invAlg(MarketActions,NetWorth,Check) &
     actActions(MarketActions,ActualActions,State,Check,NetWorth,NewMktActions,MarketActions_,ActualActions_,NetWorth_,State_,Check_,Msj,SumSet,Delta) implies
-    invAlg(MarketActions_,ActualActions_,NetWorth_,Check_,SumSet)
+    invAlg(MarketActions_,NetWorth_,Check_)
   ).
 
 actActions_pi_invAct(NewMktActions,MarketActions,ActualActions,State,Check,NetWorth,NewMktActions,MarketActions_,ActualActions_,NetWorth_,State_,Check_,Msj,SumSet,Delta):-
@@ -72,12 +72,12 @@ checkMarket_is_sat :-
   checkMarket(MarketActions,ActualActions,State,Check,NetWorth,MarketActions_,ActualActions_,State_,Check_,NetWorth_,Msj,SelectTop3,Delta) & 
   delay([MarketActions,ActualActions,State,Check,NetWorth] neq [MarketActions_,ActualActions_,State_,Check_,NetWorth_],false).
 
-checkMarket_pi_invAlg(MarketActions,ActualActions,NetWorth,Check,SumSet,MarketActions,ActualActions,State,Check,NetWorth,MarketActions_,ActualActions_,State_,Check_,NetWorth_,Msj,SelectTop3,Delta) :-
+checkMarket_pi_invAlg(MarketActions,NetWorth,Check,MarketActions,ActualActions,State,Check,NetWorth,MarketActions_,ActualActions_,State_,Check_,NetWorth_,Msj,SelectTop3,Delta) :-
   % here conjoin other ax/inv as hypotheses if necessary
   neg(
-    invAlg(MarketActions,ActualActions,NetWorth,Check,SumSet) &
+    invAlg(MarketActions,NetWorth,Check) &
     checkMarket(MarketActions,ActualActions,State,Check,NetWorth,MarketActions_,ActualActions_,State_,Check_,NetWorth_,Msj,SelectTop3,Delta) implies
-    invAlg(MarketActions_,ActualActions_,NetWorth_,Check_,SumSet)
+    invAlg(MarketActions_,NetWorth_,Check_)
   ).
 
 checkMarket_pi_invAct(NewMktActions,MarketActions,ActualActions,State,Check,NetWorth,MarketActions_,ActualActions_,State_,Check_,NetWorth_,Msj,SelectTop3,Delta):-
@@ -88,12 +88,12 @@ buyActions_is_sat :-
   buyActions(MarketActions,ActualActions,State,Check,NetWorth,MarketActions_,ActualActions_,State_,Check_,NetWorth_,Msj,SelectTop3,SumSet) & 
   delay([MarketActions,ActualActions,State,Check,NetWorth] neq [MarketActions_,ActualActions_,State_,Check_,NetWorth_],false).
 
-buyActions_pi_invAlg(MarketActions,ActualActions,NetWorth,Check,SumSet,MarketActions,ActualActions,State,Check,NetWorth,MarketActions_,ActualActions_,State_,Check_,NetWorth_,Msj,SelectTop3,SumSet) :-
+buyActions_pi_invAlg(MarketActions,NetWorth,Check,MarketActions,ActualActions,State,Check,NetWorth,MarketActions_,ActualActions_,State_,Check_,NetWorth_,Msj,SelectTop3,SumSet) :-
   % here conjoin other ax/inv as hypotheses if necessary
   neg(
-    invAlg(MarketActions,ActualActions,NetWorth,Check,SumSet) &
+    invAlg(MarketActions,NetWorth,Check) &
     buyActions(MarketActions,ActualActions,State,Check,NetWorth,MarketActions_,ActualActions_,State_,Check_,NetWorth_,Msj,SelectTop3,SumSet) implies
-    invAlg(MarketActions_,ActualActions_,NetWorth_,Check_,SumSet)
+    invAlg(MarketActions_,NetWorth_,Check_)
   ).
 
 buyActions_pi_invAct(NewMktActions,MarketActions,ActualActions,State,Check,NetWorth,MarketActions_,ActualActions_,State_,Check_,NetWorth_,Msj,SelectTop3,SumSet):-
@@ -127,11 +127,11 @@ check_aux(TO,Opt) :-
   check_sat_vc(actActions_is_sat) &
   check_sat_vc(checkMarket_is_sat) &
   check_sat_vc(buyActions_is_sat) &
-  check_unsat_vc(actActions_pi_invAlg(MarketActions,ActualActions,NetWorth,Check,SumSet,MarketActions,ActualActions,State,Check,NetWorth,NewMktActions,MarketActions_,ActualActions_,NetWorth_,State_,Check_,Msj,SumSet,Delta),TO,Opt) &
+  check_unsat_vc(actActions_pi_invAlg(MarketActions,NetWorth,Check,MarketActions,ActualActions,State,Check,NetWorth,NewMktActions,MarketActions_,ActualActions_,NetWorth_,State_,Check_,Msj,SumSet,Delta),TO,Opt) &
   check_unsat_vc(actActions_pi_invAct(NewMktActions,MarketActions,ActualActions,State,Check,NetWorth,NewMktActions,MarketActions_,ActualActions_,NetWorth_,State_,Check_,Msj,SumSet,Delta),TO,Opt) &
-  check_unsat_vc(checkMarket_pi_invAlg(MarketActions,ActualActions,NetWorth,Check,SumSet,MarketActions,ActualActions,State,Check,NetWorth,MarketActions_,ActualActions_,State_,Check_,NetWorth_,Msj,SelectTop3,Delta),TO,Opt) &
+  check_unsat_vc(checkMarket_pi_invAlg(MarketActions,NetWorth,Check,MarketActions,ActualActions,State,Check,NetWorth,MarketActions_,ActualActions_,State_,Check_,NetWorth_,Msj,SelectTop3,Delta),TO,Opt) &
   check_unsat_vc(checkMarket_pi_invAct(NewMktActions,MarketActions,ActualActions,State,Check,NetWorth,MarketActions_,ActualActions_,State_,Check_,NetWorth_,Msj,SelectTop3,Delta),TO,Opt) &
-  check_unsat_vc(buyActions_pi_invAlg(MarketActions,ActualActions,NetWorth,Check,SumSet,MarketActions,ActualActions,State,Check,NetWorth,MarketActions_,ActualActions_,State_,Check_,NetWorth_,Msj,SelectTop3,SumSet),TO,Opt) &
+  check_unsat_vc(buyActions_pi_invAlg(MarketActions,NetWorth,Check,MarketActions,ActualActions,State,Check,NetWorth,MarketActions_,ActualActions_,State_,Check_,NetWorth_,Msj,SelectTop3,SumSet),TO,Opt) &
   check_unsat_vc(buyActions_pi_invAct(NewMktActions,MarketActions,ActualActions,State,Check,NetWorth,MarketActions_,ActualActions_,State_,Check_,NetWorth_,Msj,SelectTop3,SumSet),TO,Opt) &
   check_aux_stats.
 

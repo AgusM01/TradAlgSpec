@@ -12,8 +12,8 @@ variables([MarketActions, ActualActions, NetWorth, State, Check, NewMktActions])
 
 % Sinonimos de tipo
 def_type(value, int).                                                  
-def_type(alpha, int).                                                  
-def_type(actions, rel(stock, [value, alpha])).                         
+def_type(alpha, int).
+def_type(actions, rel(stock, [value,alpha])).                         
 
 def_type(algstate, enum([checking, buying])).                           
 def_type(msj, enum([                                                    
@@ -45,25 +45,12 @@ axm3(SelectTop3) :- pfun(SelectTop3).
 
 
 invariant(invAlg).                                                      
-dec_p_type(invAlg(actions, set(stock), value, int, rel(set(value), value))).                    
-invAlg(MarketActions, ActualActions, NetWorth, Check, SumSet):-                 
+dec_p_type(invAlg(actions, value, int)).                    
+invAlg(MarketActions, NetWorth, Check):-                 
+    
     pfun(MarketActions) &
-    ran(MarketActions, A) & 
-    dec(A, set([value,alpha])) &
-    foreach([X,Y] in A, (X >= 0 & Y >= 0)) &
-    size(ActualActions, SA) &
-    dec(SA, int) &
-    (SA > 3) &
-    (Check >= 0) & 
-    dres(ActualActions, MarketActions, Dam) &
-    dec(Dam, actions) &
-    ran(Dam, Rdam) &
-    dec(Rdam, set([value,alpha])) &
-    dom(Rdam, DRdam) &
-    dec(DRdam, set(value)) &
-    applyTo(SumSet, DRdam, Nw) &
-    dec(Nw, value) &
-    NetWorth = Nw.
+    Check >= 0 &
+    NetWorth >= 0. 
 
 invariant(invAct).
 dec_p_type(invAct(actions)).
@@ -143,19 +130,29 @@ actActionsErrorTimeToCheck(NewMktActions, State, Check, Msj, Delta) :-
         SMKT >= 3) & 
     Msj = errorTimeToCheck.
 
+dec_p_type(actActions_error_case(actions, set(stock), algstate, int, value, actions, actions, set(stock), value, algstate, int, msj, int)).
+actActions_error_case(MarketActions, ActualActions, State, Check, NetWorth, NewMktActions,
+                      MarketActions_, ActualActions_, NetWorth_, State_, Check_, Msj, Delta) :-
+    ( actActionsErrorBuyInProgress(NewMktActions, State, Check, Msj, Delta)
+      or actActionsErrorGettingActions(NewMktActions, State, Check, Msj, Delta)
+      or actActionsErrorTimeToCheck(NewMktActions, State, Check, Msj, Delta)
+    ) &
+    MarketActions_ = MarketActions &
+    ActualActions_ = ActualActions &
+    NetWorth_ = NetWorth &
+    State_ = State &
+    Check_ = Check.
+
+% --- Ahora la operación ---
 operation(actActions).
 dec_p_type(actActions(actions, set(stock), algstate, int, value, actions, actions, set(stock), value, algstate, int, msj, rel(set(value), value), int)).
-actActions(MarketActions, ActualActions, State, Check, NetWorth, NewMktActions, MarketActions_, ActualActions_, NetWorth_, State_, Check_, Msj, SumSet, Delta) :- 
-    actActionsOk(ActualActions, State, Check, NewMktActions, MarketActions_, ActualActions_, NetWorth_, State_, Check_, Msj, SumSet, Delta) 
-    or 
-    (   (actActionsErrorBuyInProgress(NewMktActions, State, Check, Msj, Delta) or 
-        actActionsErrorGettingActions(NewMktActions, State, Check, Msj, Delta) or 
-        actActionsErrorTimeToCheck(NewMktActions, State, Check, Msj, Delta)) &
-        MarketActions_ = MarketActions &
-        ActualActions_ = ActualActions & 
-        NetWorth_ = NetWorth &
-        State_ = State &
-        Check_ = Check    ).
+actActions(MarketActions, ActualActions, State, Check, NetWorth, NewMktActions,
+           MarketActions_, ActualActions_, NetWorth_, State_, Check_, Msj, SumSet, Delta) :-
+    actActionsOk(ActualActions, State, Check, NewMktActions, MarketActions_, ActualActions_, NetWorth_, State_, Check_, Msj, SumSet, Delta)
+    or
+    actActions_error_case(MarketActions, ActualActions, State, Check, NetWorth, NewMktActions,
+                          MarketActions_, ActualActions_, NetWorth_, State_, Check_, Msj, Delta).
+
         
 %%%%%%%%%%%%%%%%%%%% ActActions %%%%%%%%%%%%%%%%%%%%%%%
 
