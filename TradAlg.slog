@@ -89,22 +89,25 @@ actActionsOk(ActualActions, State, Check, NewMktActions, MarketActions_, ActualA
     State = checking &
     
     % #NewMktActions? >= 3
-    size(NewMktActions, SMKT) &
-    dec(SMKT, int) &
-    SMKT >= 3 &
+    let([SMKT],
+    size(NewMktActions, SMKT),
+    dec(SMKT, int),
+    SMKT >= 3) & 
+    dec(let, int).
     
     Check =< Delta &
     MarketActions_ = NewMktActions &
     ActualActions_ = ActualActions &
     
     % NetWorth' = SumSet (dom (ran ( ActualActions <| MarketActions')))
-    dres(ActualActions, MarketActions_, S) &
-    dec(S, actions) &
-    ran(S, R) &
-    dec(R, set([value,alpha])) &
-    dom(R, D) &
-    dec(D, set(value)) &
-    applyTo(SumSet, D, NetWorth_) & 
+    let([S, R, D],
+    dres(ActualActions, MarketActions_, S),
+    dec(S, actions),
+    ran(S, R),
+    dec(R, set([value,alpha])),
+    dom(R, D),
+    dec(D, set(value)),
+    applyTo(SumSet, D, NetWorth_)) &
     
     State_ = State &
     Check_ = Check + 1 &
@@ -115,9 +118,10 @@ dec_p_type(actActionsErrorBuyInProgress(actions, algstate, int, msj, int)).
 actActionsErrorBuyInProgress(NewMktActions, State, Check, Msj, Delta) :-
     State = buying &
     Check =< Delta &
-    size(NewMktActions, SMKT) &
-    dec(SMKT, int) &
-    SMKT >= 3 &
+    let([SMKT], 
+    size(NewMktActions, SMKT),
+    dec(SMKT, int),
+    SMKT >= 3) &
     Msj = errorBuyingInProcess.
 
 %ActActionsErrorGettingActions
@@ -125,9 +129,10 @@ dec_p_type(actActionsErrorGettingActions(actions, algstate, int, msj, int)).
 actActionsErrorGettingActions(NewMktActions, State, Check, Msj, Delta) :-
     State = checking &
     Check =< Delta &
-    size(NewMktActions, SMKT) &
-    dec(SMKT, int) &
-    SMKT < 3 &
+    let([SMKT],
+    size(NewMktActions, SMKT),
+    dec(SMKT, int),
+    SMKT < 3) &
     Msj = errorGettingActions.
 
 %ActActionsErrorTimeToCheck
@@ -135,9 +140,10 @@ dec_p_type(actActionsErrorTimeToCheck(actions, algstate, int, msj, int)).
 actActionsErrorTimeToCheck(NewMktActions, State, Check, Msj, Delta) :-
     State = checking &
     Check > Delta &
-    size(NewMktActions, SMKT) &
-    dec(SMKT, int) &
-    SMKT >= 3 &
+    let([SMKT], 
+    size(NewMktActions, SMKT), 
+    dec(SMKT, int), 
+    SMKT >= 3) &
     Msj = errorTimeToCheck.
 
 operation(actActions).
