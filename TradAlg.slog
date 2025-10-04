@@ -7,6 +7,7 @@ parameters([Delta, SumSet, SelectTop3]).
 
 variables([MarketActions, ActualActions, NetWorth, State, Check, NewMktActions]).
 
+
 %Cada una de estas son cláusulas.
 
 % Sinonimos de tipo
@@ -84,29 +85,28 @@ initAlg(MarketActions, ActualActions, NetWorth, State, Check) :-
 % ActActionsOk
 % No es necesario nombrar a las variables que no se usan (MarketActions, NetWorth).
 % En su caso, se usan únicamente las primadas.
+
 dec_p_type(actActionsOk(set(stock), algstate, int, actions, actions, set(stock), value, algstate, int, msj, rel(set(value), value), int)).
 actActionsOk(ActualActions, State, Check, NewMktActions, MarketActions_, ActualActions_, NetWorth_, State_, Check_, Msj, SumSet, Delta)  :-
     State = checking &
     
     % #NewMktActions? >= 3
     let([SMKT],
-    size(NewMktActions, SMKT),
-    dec(SMKT, int),
-    SMKT >= 3) & 
-    dec(let, int).
-    
+        ( size(NewMktActions, SMKT) & dec(SMKT, int) ),
+        SMKT >= 3) & 
+
     Check =< Delta &
     MarketActions_ = NewMktActions &
     ActualActions_ = ActualActions &
     
     % NetWorth' = SumSet (dom (ran ( ActualActions <| MarketActions')))
     let([S, R, D],
-    dres(ActualActions, MarketActions_, S),
-    dec(S, actions),
-    ran(S, R),
-    dec(R, set([value,alpha])),
-    dom(R, D),
-    dec(D, set(value)),
+    (dres(ActualActions, MarketActions_, S) &
+    dec(S, actions) &
+    ran(S, R) &
+    dec(R, set([value,alpha])) &
+    dom(R, D) &
+    dec(D, set(value))),
     applyTo(SumSet, D, NetWorth_)) &
     
     State_ = State &
@@ -118,10 +118,9 @@ dec_p_type(actActionsErrorBuyInProgress(actions, algstate, int, msj, int)).
 actActionsErrorBuyInProgress(NewMktActions, State, Check, Msj, Delta) :-
     State = buying &
     Check =< Delta &
-    let([SMKT], 
-    size(NewMktActions, SMKT),
-    dec(SMKT, int),
-    SMKT >= 3) &
+    let([SMKT],
+        ( size(NewMktActions, SMKT) & dec(SMKT, int) ),
+        SMKT >= 3) & 
     Msj = errorBuyingInProcess.
 
 %ActActionsErrorGettingActions
@@ -130,9 +129,8 @@ actActionsErrorGettingActions(NewMktActions, State, Check, Msj, Delta) :-
     State = checking &
     Check =< Delta &
     let([SMKT],
-    size(NewMktActions, SMKT),
-    dec(SMKT, int),
-    SMKT < 3) &
+        ( size(NewMktActions, SMKT) & dec(SMKT, int) ),
+        SMKT < 3) & 
     Msj = errorGettingActions.
 
 %ActActionsErrorTimeToCheck
@@ -140,10 +138,9 @@ dec_p_type(actActionsErrorTimeToCheck(actions, algstate, int, msj, int)).
 actActionsErrorTimeToCheck(NewMktActions, State, Check, Msj, Delta) :-
     State = checking &
     Check > Delta &
-    let([SMKT], 
-    size(NewMktActions, SMKT), 
-    dec(SMKT, int), 
-    SMKT >= 3) &
+    let([SMKT],
+        ( size(NewMktActions, SMKT) & dec(SMKT, int) ),
+        SMKT >= 3) & 
     Msj = errorTimeToCheck.
 
 operation(actActions).
@@ -169,9 +166,10 @@ dec_p_type(checkMarketToBuyOk(algstate, int, actions, set(stock), value, actions
 checkMarketToBuyOk(State, Check, MarketActions, ActualActions, NetWorth, MarketActions_, ActualActions_, NetWorth_, State_, Check_, Msj, SelectTop3, Delta):- 
     State = checking & 
     Check > Delta &
-    applyTo(SelectTop3, MarketActions, S) &
-    dec(S, set(stock)) &
-    S neq ActualActions &
+    let([S],
+    (applyTo(SelectTop3, MarketActions, S) &
+    dec(S, set(stock))),
+    S neq ActualActions) &
     MarketActions_ = MarketActions &
     ActualActions_ = ActualActions &
     NetWorth_ = NetWorth &
@@ -184,9 +182,12 @@ dec_p_type(checkMarketNotBuyOk(algstate, int, actions, set(stock), value, action
 checkMarketNotBuyOk(State, Check, MarketActions, ActualActions, NetWorth, MarketActions_, ActualActions_, NetWorth_, State_, Check_, Msj, SelectTop3, Delta):- 
     State = checking & 
     Check > Delta &
-    applyTo(SelectTop3, MarketActions, S) &
-    dec(S, set(stock)) &
-    S = ActualActions &
+    
+    let([S],
+    (applyTo(SelectTop3, MarketActions, S) &
+    dec(S, set(stock))),
+    S = ActualActions) &
+    
     MarketActions_ = MarketActions &
     ActualActions_ = ActualActions &
     NetWorth_ = NetWorth &
@@ -199,9 +200,10 @@ dec_p_type(checkMarketToBuyErrorBuying(algstate, int, actions, set(stock), msj, 
 checkMarketToBuyErrorBuying(State, Check, MarketActions, ActualActions, Msj, SelectTop3, Delta):-
     State = buying &
     Check > Delta &
-    applyTo(SelectTop3, MarketActions, S) &
-    dec(S, set(stock)) &
-    S neq ActualActions &
+    let([S],
+    (applyTo(SelectTop3, MarketActions, S) &
+    dec(S, set(stock))),
+    S neq ActualActions) &
     Msj = errorCheckingDuringBuying.
 
 
@@ -210,9 +212,10 @@ dec_p_type(checkMarketToBuyErrorDelta(algstate, int, actions, set(stock), msj, r
 checkMarketToBuyErrorDelta(State, Check, MarketActions, ActualActions, Msj, SelectTop3, Delta):-
     State = checking &
     Check =< Delta &
-    applyTo(SelectTop3, MarketActions, S) &
-    dec(S, set(stock)) &
-    S neq ActualActions &
+    let([S],
+    (applyTo(SelectTop3, MarketActions, S) &
+    dec(S, set(stock))),
+    S neq ActualActions) &
     Msj = errorCheckingDeltaNotReached.
 
 
@@ -221,9 +224,10 @@ dec_p_type(checkMarketNotBuyErrorBuying(algstate, int, actions, set(stock), msj,
 checkMarketNotBuyErrorBuying(State, Check, MarketActions, ActualActions, Msj, SelectTop3, Delta):-
     State = buying &
     Check > Delta &
-    applyTo(SelectTop3, MarketActions, S) &
-    dec(S, set(stock)) &
-    S = ActualActions &
+    let([S],
+    (applyTo(SelectTop3, MarketActions, S) &
+    dec(S, set(stock))),
+    S = ActualActions) &
     Msj = errorCheckingDuringBuying.
 
 
@@ -232,9 +236,10 @@ dec_p_type(checkMarketNotBuyErrorDelta(algstate, int, actions, set(stock), msj, 
 checkMarketNotBuyErrorDelta(State, Check, MarketActions, ActualActions, Msj, SelectTop3, Delta):-
     State = checking &
     Check =< Delta &
-    applyTo(SelectTop3, MarketActions, S) &
-    dec(S, set(stock)) &
-    S = ActualActions &
+    let([S],
+    (applyTo(SelectTop3, MarketActions, S) &
+    dec(S, set(stock))),
+    S = ActualActions) &
     Msj = errorCheckingDeltaNotReached.
 
 
@@ -267,19 +272,21 @@ buyActionsOk(State, Check, NetWorth, MarketActions, ActualActions, MarketActions
     
     Check = 0 &
     
-    dres(ActualActions, MarketActions, S) &
+    let([S,R,D,K],
+    (dres(ActualActions, MarketActions, S) &
     dec(S, actions) &
     ran(S, R) &
     dec(R, set([value,alpha])) &
     dom(R, D) &
     dec(D, set(value)) &
     applyTo(SumSet, D, K) &
-    dec(K, value) &
-    NetWorth >= K &
+    dec(K, value)),
+    NetWorth >= K) &
     
-    applyTo(SelectTop3, MarketActions, Top) &
-    dec(Top, set(stock)) &
-    ActualActions_ = Top &
+    let([Top],
+    (applyTo(SelectTop3, MarketActions, Top) &
+    dec(Top, set(stock))),
+    ActualActions_ = Top) &
     
     MarketActions_ = MarketActions &
     
@@ -287,15 +294,16 @@ buyActionsOk(State, Check, NetWorth, MarketActions, ActualActions, MarketActions
     
     State_ = checking &
 
-    dres(ActualActions_, MarketActions, An) &
+    let([An, Rn, Dn, Kn],
+    (dres(ActualActions_, MarketActions, An) &
     dec(An, actions) &
     ran(An, Rn) &
     dec(Rn, set([value,alpha])) &
     dom(Rn, Dn) &
     dec(Dn, set(value)) &
     applyTo(SumSet, Dn, Kn) &
-    dec(Kn, value) &
-    NetWorth_ = Kn &
+    dec(Kn, value)),
+    NetWorth_ = Kn) &
 
     Msj = ok.
 
@@ -306,15 +314,16 @@ buyActionsErrorNotBuying(State, Check, NetWorth, MarketActions, ActualActions, M
     State = checking &
     Check = 0 &
     
-    dres(ActualActions, MarketActions, S) &
+    let([S, R, D, K],
+    (dres(ActualActions, MarketActions, S) &
     dec(S, actions) &
     ran(S, R) &
     dec(R, set([value,alpha])) &
     dom(R, D) &
     dec(D, set(value)) &
     applyTo(SumSet, D, K) &
-    dec(K, value) &
-    NetWorth >= K &
+    dec(K, value)), 
+    NetWorth >= K) &
 
     Msj = errorBuyActionNotBuying.
 
@@ -325,15 +334,16 @@ buyActionsErrorNotFounds(State, Check, NetWorth, MarketActions, ActualActions, M
     State = buying &
     Check = 0 &
     
-    dres(ActualActions, MarketActions, S) &
+    let([S, R, D, K],
+    (dres(ActualActions, MarketActions, S) &
     dec(S, actions) &
     ran(S, R) &
     dec(R, set([value,alpha])) &
     dom(R, D) &
     dec(D, set(value)) &
     applyTo(SumSet, D, K) &
-    dec(K, value) &
-    NetWorth < K &
+    dec(K, value)), 
+    NetWorth < K) &
 
     Msj = errorBuyActionNotFounds.
 
@@ -345,15 +355,16 @@ buyActionsErrorDelta(State, Check, NetWorth, MarketActions, ActualActions, Msj, 
     State = buying &
     Check neq 0 &
     
-    dres(ActualActions, MarketActions, S) &
+    let([S, R, D, K],
+    (dres(ActualActions, MarketActions, S) &
     dec(S, actions) &
     ran(S, R) &
     dec(R, set([value,alpha])) &
     dom(R, D) &
     dec(D, set(value)) &
     applyTo(SumSet, D, K) &
-    dec(K, value) &
-    NetWorth >= K &
+    dec(K, value)), 
+    NetWorth >= K) &
 
     Msj = errorBuyActionDeltaError.
 
