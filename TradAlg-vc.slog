@@ -48,10 +48,6 @@ initAlg_sat_invAlg :-
   initAlg(MarketActions,ActualActions,NetWorth,State,Check) &
   invAlg(MarketActions,NetWorth,Check).
 
-initAlg_sat_invAct :-
-  initAlg(MarketActions,ActualActions,NetWorth,State,Check) &
-  invAct(NewMktActions).
-
 actActions_is_sat :-
   actActions(MarketActions,ActualActions,State,Check,NetWorth,NewMktActions,MarketActions_,ActualActions_,NetWorth_,State_,Check_,Msj,SumSet,Delta) & 
   delay([MarketActions,ActualActions,NetWorth,State,Check] neq [MarketActions_,ActualActions_,NetWorth_,State_,Check_],false).
@@ -63,10 +59,6 @@ actActions_pi_invAlg(MarketActions,NetWorth,Check,MarketActions,ActualActions,St
     actActions(MarketActions,ActualActions,State,Check,NetWorth,NewMktActions,MarketActions_,ActualActions_,NetWorth_,State_,Check_,Msj,SumSet,Delta) implies
     invAlg(MarketActions_,NetWorth_,Check_)
   ).
-
-actActions_pi_invAct(NewMktActions,MarketActions,ActualActions,State,Check,NetWorth,NewMktActions,MarketActions_,ActualActions_,NetWorth_,State_,Check_,Msj,SumSet,Delta):-
-  % actActions doesn't change invAct variables
-  neg(true).
 
 checkMarket_is_sat :-
   checkMarket(MarketActions,ActualActions,State,Check,NetWorth,MarketActions_,ActualActions_,State_,Check_,NetWorth_,Msj,SelectTop3,Delta) & 
@@ -80,10 +72,6 @@ checkMarket_pi_invAlg(MarketActions,NetWorth,Check,MarketActions,ActualActions,S
     invAlg(MarketActions_,NetWorth_,Check_)
   ).
 
-checkMarket_pi_invAct(NewMktActions,MarketActions,ActualActions,State,Check,NetWorth,MarketActions_,ActualActions_,State_,Check_,NetWorth_,Msj,SelectTop3,Delta):-
-  % checkMarket doesn't change invAct variables
-  neg(true).
-
 buyActions_is_sat :-
   buyActions(MarketActions,ActualActions,State,Check,NetWorth,MarketActions_,ActualActions_,State_,Check_,NetWorth_,Msj,SelectTop3,SumSet) & 
   delay([MarketActions,ActualActions,State,Check,NetWorth] neq [MarketActions_,ActualActions_,State_,Check_,NetWorth_],false).
@@ -95,10 +83,6 @@ buyActions_pi_invAlg(MarketActions,NetWorth,Check,MarketActions,ActualActions,St
     buyActions(MarketActions,ActualActions,State,Check,NetWorth,MarketActions_,ActualActions_,State_,Check_,NetWorth_,Msj,SelectTop3,SumSet) implies
     invAlg(MarketActions_,NetWorth_,Check_)
   ).
-
-buyActions_pi_invAct(NewMktActions,MarketActions,ActualActions,State,Check,NetWorth,MarketActions_,ActualActions_,State_,Check_,NetWorth_,Msj,SelectTop3,SumSet):-
-  % buyActions doesn't change invAct variables
-  neg(true).
 
 check_vcs_TradAlg :-
    def_to(TO) &
@@ -123,16 +107,12 @@ check_aux(TO,Opt) :-
   check_aux_set_initial &
   check_sat_vc(axioms_sat) &
   check_sat_vc(initAlg_sat_invAlg) &
-  check_sat_vc(initAlg_sat_invAct) &
   check_sat_vc(actActions_is_sat) &
   check_sat_vc(checkMarket_is_sat) &
   check_sat_vc(buyActions_is_sat) &
   check_unsat_vc(actActions_pi_invAlg(MarketActions,NetWorth,Check,MarketActions,ActualActions,State,Check,NetWorth,NewMktActions,MarketActions_,ActualActions_,NetWorth_,State_,Check_,Msj,SumSet,Delta),TO,Opt) &
-  check_unsat_vc(actActions_pi_invAct(NewMktActions,MarketActions,ActualActions,State,Check,NetWorth,NewMktActions,MarketActions_,ActualActions_,NetWorth_,State_,Check_,Msj,SumSet,Delta),TO,Opt) &
   check_unsat_vc(checkMarket_pi_invAlg(MarketActions,NetWorth,Check,MarketActions,ActualActions,State,Check,NetWorth,MarketActions_,ActualActions_,State_,Check_,NetWorth_,Msj,SelectTop3,Delta),TO,Opt) &
-  check_unsat_vc(checkMarket_pi_invAct(NewMktActions,MarketActions,ActualActions,State,Check,NetWorth,MarketActions_,ActualActions_,State_,Check_,NetWorth_,Msj,SelectTop3,Delta),TO,Opt) &
   check_unsat_vc(buyActions_pi_invAlg(MarketActions,NetWorth,Check,MarketActions,ActualActions,State,Check,NetWorth,MarketActions_,ActualActions_,State_,Check_,NetWorth_,Msj,SelectTop3,SumSet),TO,Opt) &
-  check_unsat_vc(buyActions_pi_invAct(NewMktActions,MarketActions,ActualActions,State,Check,NetWorth,MarketActions_,ActualActions_,State_,Check_,NetWorth_,Msj,SelectTop3,SumSet),TO,Opt) &
   check_aux_stats.
 
 :- nl & prolog_call(ansi_format([bold,fg(green)],'Type checking has been deactivated.',[])) & nl & nl.

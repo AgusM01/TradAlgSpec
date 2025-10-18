@@ -5,7 +5,7 @@
 
 parameters([Delta, SumSet, SelectTop3]).       
 
-variables([MarketActions, ActualActions, NetWorth, State, Check, NewMktActions]).
+variables([MarketActions, ActualActions, NetWorth, State, Check]).
 
 
 %Cada una de estas son cláusulas.
@@ -52,10 +52,10 @@ invAlg(MarketActions, NetWorth, Check):-
     Check >= 0 &
     NetWorth >= 0. 
 
-invariant(invAct).
-dec_p_type(invAct(actions)).
-invAct(NewMktActions) :-
-    pfun(NewMktActions).
+%invariant(invAct).
+%dec_p_type(invAct(actions)).
+%invAct(NewMktActions) :-
+%    pfun(NewMktActions).
 
 % Estado inicial
 initial(initAlg).
@@ -408,11 +408,10 @@ q(D, SS, ST3) :-
     ST3 = { [ { [stock:a,[5,10]],[stock:b,[3,7]],[stock:c,[9,1]],[stock:d,[4,6]] }, {stock:a,stock:c,stock:d} ],
             [ { [stock:x,[2,5]],[stock:y,[10,4]],[stock:z,[7,9]] }, {stock:y,stock:z,stock:x} ] } .
 
-dec_p_type(sim_init(actions, set(stock), value, algstate, int, msj)).
-sim_init(MarketActions, ActualActions, NetWorth, State, Check, Msj):-
+dec_p_type(sim_init(actions, set(stock), value, algstate, int)).
+sim_init(MarketActions, ActualActions, NetWorth, State, Check):-
     MarketActions = {} &
     ActualActions = {} & 
     NetWorth = 0 & 
     State = checking &
-    Check = 0 &
-    Msj = ok.
+    Check = 0.
