@@ -101,7 +101,7 @@ actActionsOk(ActualActions, State, Check, NewMktActions, MarketActions_, ActualA
     NetWorth_ >= 0) &
     
     State_ = State &
-    Check_ = Check + 1 &
+    Check_ is Check + 1 &
     Msj = ok.
 
 %ActActionsErrorBuyInProgress
@@ -403,15 +403,23 @@ buyActions(MarketActions, ActualActions, State, Check, NetWorth, MarketActions_,
 % Fixing specification parameters
 dec_p_type(q(int, rel(set(value),value), rel(actions,set(stock)))).
 q(D, SS, ST3) :-
-    D = 3 &
+    D = 2 &
     SS = {[{1,2},3],[{2,5},7],[{},0]} &
     ST3 = { [ { [stock:a,[5,10]],[stock:b,[3,7]],[stock:c,[9,1]],[stock:d,[4,6]] }, {stock:a,stock:c,stock:d} ],
             [ { [stock:x,[2,5]],[stock:y,[10,4]],[stock:z,[7,9]] }, {stock:y,stock:z,stock:x} ] } .
 
-dec_p_type(sim_init(actions, set(stock), value, algstate, int)).
-sim_init(MarketActions, ActualActions, NetWorth, State, Check):-
+dec_p_type(sim_init_noFunds(actions, set(stock), value, algstate, int)).
+sim_init_noFunds(MarketActions, ActualActions, NetWorth, State, Check):-
     MarketActions = {} &
     ActualActions = {} & 
     NetWorth = 0 & 
+    State = checking &
+    Check = 0.
+
+dec_p_type(sim_init_100Funds(actions, set(stock), value, algstate, int)).
+sim_init_100Funds(MarketActions, ActualActions, NetWorth, State, Check):-
+    MarketActions = {} &
+    ActualActions = {} & 
+    NetWorth = 100 & 
     State = checking &
     Check = 0.
