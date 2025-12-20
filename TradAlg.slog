@@ -39,7 +39,7 @@ axm1(Delta) :- Delta > 0.
 
 axiom(axm2).                                                            
 dec_p_type(axm2(rel(set(value),value))).                                     
-axm2(SumSet) :- pfun(SumSet).                                           
+axm2(SumSet) :- pfun(SumSet).
 
 axiom(axm3).                                                            
 dec_p_type(axm3(rel(actions,set(stock)))).                              
@@ -80,7 +80,7 @@ initAlg(MarketActions, ActualActions, State, Check) :-
 
 %%%%%%%%%%%%%%%%%%%% ActActions %%%%%%%%%%%%%%%%%%%%%%%
 % ActActionsOk
-% No es necesario nombrar a las variables que no se usan (MarketActions, NetWorth).
+% No es necesario nombrar a las variables que no se usan (MarketActions).
 % En su caso, se usan únicamente las primadas.
 
 dec_p_type(actActionsOk(set(stock), algstate, int, actions, actions, set(stock), algstate, int, msj, int)).
@@ -134,9 +134,9 @@ actActionsErrorGettingActions(NewMktActions, ActualActions, State, Check, Msj, D
     size(NewMktActions, SMKT) &
     dec(SMKT, int) &
     SMKT < 3 &
-    dom(NewMktActions, DomMkt) &
-    dec(DomMkt, set(stock)) &
-    subset(ActualActions, DomMkt) &
+    % dom(NewMktActions, DomMkt) &
+    % dec(DomMkt, set(stock)) &
+    % subset(ActualActions, DomMkt) &
 
     Msj = errorGettingActions.
 
@@ -244,7 +244,6 @@ checkMarketToBuyErrorBuying(State, Check, MarketActions, ActualActions, Msj, Sel
     dec(S, set(stock)) &
     S neq ActualActions &
 
-
     Msj = errorCheckingDuringBuying.
 
 
@@ -257,7 +256,6 @@ checkMarketToBuyErrorDelta(State, Check, MarketActions, ActualActions, Msj, Sele
     applyTo(SelectTop3, MarketActions, S) &
     dec(S, set(stock)) &
     S neq ActualActions &
-
 
     Msj = errorCheckingDeltaNotReached.
 
@@ -272,7 +270,6 @@ checkMarketNotBuyErrorBuying(State, Check, MarketActions, ActualActions, Msj, Se
     dec(S, set(stock)) &
     S = ActualActions &
 
-    
     Msj = errorCheckingDuringBuying.
 
 
@@ -320,9 +317,6 @@ buyActionsOk(State, Check, MarketActions, ActualActions, MarketActions_, ActualA
     
     Check = 0 &
     
-    % El error está acá. Hay que checkear que NetWorth sea mayor a las acciones que quiero comprar.
-    % Cambiar esto en todas las partes del buy y en la especificación.
-    
     % Checkeo que haya fondos suficientes para comprar las acciones.
     
     % Valor de las acciones que poseo
@@ -341,7 +335,6 @@ buyActionsOk(State, Check, MarketActions, ActualActions, MarketActions_, ActualA
     % Valor de las acciones que quiero comprar
     applyTo(SelectTop3, MarketActions, Top3) &
     dec(Top3, set(stock)) &
-
 
     % Garantizo que las acciones estén efectivamente denro de MarketActions
     dom(MarketActions, DomMkt) &
@@ -539,7 +532,7 @@ buyActionsErrorSelectTop3(State, Check, MarketActions, ActualActions ,Msj, Selec
     applyTo(SelectTop3, MarketActions, Top3) &
     dec(Top3, set(stock)) &
 
-    % No se garantiza que las acciones estén efectivamente denro de MarketActions
+    % No se garantiza que las acciones estén efectivamente dentro de MarketActions
     dom(MarketActions, DomMkt) &
     dec(DomMkt, set(stock)) &
     nsubset(Top3, DomMkt) &
@@ -587,20 +580,31 @@ buyActions(MarketActions, ActualActions, State, Check, MarketActions_, ActualAct
 dec_p_type(q(int, rel(set(value),value), rel(actions,set(stock)))).
 q(D, SS, ST3) :-
     D = 2 &
-    SS = {[{1,2},3],[{2,5},7],[{},0]} &
-    ST3 = { [ { [stock:a,[5,10]],[stock:b,[3,7]],[stock:c,[9,1]],[stock:d,[4,6]] }, {stock:a,stock:c,stock:d} ],
-            [ { [stock:x,[2,5]],[stock:y,[10,4]],[stock:z,[7,9]] }, {stock:y,stock:z,stock:x} ] } .
+    % Definimos sumas para los conjuntos de valores que aparecerán
+    % {10,7,6} = 23 (Top 3 inicial)
+    % {90,3,10} = 103 (Segundo mercado)
+    % {10,1,6} = 17 (Tercer mercado)
+    SS = {[{},0], [{10,7,6},23], [{90,3,10},103], [{10,1,6},17], [{5,2,1},8]} &
+    ST3 = { 
+        % Si el mercado tiene s1,s2,s3,s4 -> elige s1,s2,s4 (suponiendo que son las mejores)
+        [{[stock:s1,[10,1]],[stock:s2,[7,1]],[stock:s3,[2,1]],[stock:s4,[6,1]]}, {stock:s1,stock:s2,stock:s4}],
+        % Si el mercado tiene x,y,z -> elige x,y,z
+        [{[stock:x,[90,1]],[stock:y,[3,1]],[stock:z,[10,1]]}, {stock:x,stock:y,stock:z}],
+        % Rotación: si vuelve el mercado a,b,c,d -> elige a,c,d
+        [{[stock:a,[5,1]],[stock:b,[2,1]],[stock:c,[1,1]],[stock:d,[10,1]]}, {stock:a,stock:c,stock:d}]
+    }.
 
-dec_p_type(sim_init_noFunds(actions, set(stock), algstate, int)).
-sim_init_noFunds(MarketActions, ActualActions, State, Check):-
+dec_p_type(sim_init_noActions(actions, set(stock), algstate, int)).
+sim_init_noActions(MarketActions, ActualActions, State, Check):-
     MarketActions = {} &
     ActualActions = {} & 
     State = analyzing &
     Check = 0.
 
-dec_p_type(sim_init_100Funds(actions, set(stock), algstate, int)).
-sim_init_100Funds(MarketActions, ActualActions, State, Check):-
-    MarketActions = {} &
-    ActualActions = {} & 
+dec_p_type(sim_init_3Actions(actions, set(stock), algstate, int)).
+sim_init_3Actions(MarketActions, ActualActions, State, Check):-
+    % Empezamos con 3 acciones que ya valen mucho (ej. 100)
+    MarketActions = {[stock:s1,[50,1]], [stock:s2,[30,1]], [stock:s4,[20,1]]} &
+    ActualActions = {stock:s1, stock:s2, stock:s4} & 
     State = analyzing &
     Check = 0.
