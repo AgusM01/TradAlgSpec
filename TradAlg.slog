@@ -580,19 +580,58 @@ buyActions(MarketActions, ActualActions, State, Check, MarketActions_, ActualAct
 dec_p_type(q(int, rel(set(value),value), rel(actions,set(stock)))).
 q(D, SS, ST3) :-
     D = 2 &
-    % Definimos sumas para los conjuntos de valores que aparecerán
-    % {10,7,6} = 23 (Top 3 inicial)
-    % {90,3,10} = 103 (Segundo mercado)
-    % {10,1,6} = 17 (Tercer mercado)
-    SS = {[{},0], [{10,7,6},23], [{90,3,10},103], [{10,1,6},17], [{5,2,1},8]} &
-    ST3 = { 
-        % Si el mercado tiene s1,s2,s3,s4 -> elige s1,s2,s4 (suponiendo que son las mejores)
-        [{[stock:s1,[10,1]],[stock:s2,[7,1]],[stock:s3,[2,1]],[stock:s4,[6,1]]}, {stock:s1,stock:s2,stock:s4}],
-        % Si el mercado tiene x,y,z -> elige x,y,z
-        [{[stock:x,[90,1]],[stock:y,[3,1]],[stock:z,[10,1]]}, {stock:x,stock:y,stock:z}],
-        % Rotación: si vuelve el mercado a,b,c,d -> elige a,c,d
-        [{[stock:a,[5,1]],[stock:b,[2,1]],[stock:c,[1,1]],[stock:d,[10,1]]}, {stock:a,stock:c,stock:d}]
-    }.
+    SS = {
+        [{40,30,30},100],
+        [{50,30,20},100],
+        [{60,20,20},100],
+
+        [{50,30,10},90],
+        [{60,20,10},90],
+        [{40,30,20},90],
+
+        [{40,30,10},80],
+        [{50,20,10},80],
+        [{10,40,30},80],
+
+        [{30,30,10},70],
+        [{10,30,30},70],
+
+        [{30,20,10},60],
+
+        [{20,20,10},50]
+    } &
+    ST3 = {
+            [   {   [stock:s1,[40,3]],
+                    [stock:s2,[30,2]],
+                    [stock:s3,[30,4]],
+                    [stock:s4,[10,1]]   },
+                {stock:s1, stock:s2, stock:s3}  ],
+            [   {   
+                    [stock:s1,[50,4]],
+                    [stock:s2,[30,3]],
+                    [stock:s3,[10,1]],
+                    [stock:s4,[20,2]]},
+                {stock:s1, stock:s2, stock:s4}  ],
+            [   {
+                    [stock:s1,[60,4]],
+                    [stock:s2,[10,1]],
+                    [stock:s3,[20,3]],
+                    [stock:s4,[20,2]]},
+                {stock:s1, stock:s3, stock:s4}  ],
+            [   {
+                    [stock:s1,[10,1]],
+                    [stock:s2,[40,3]],
+                    [stock:s3,[30,4]],
+                    [stock:s4,[30,2]]},
+                {stock:s2, stock:s3, stock:s4}  ],
+            [   {
+                    [stock:s1,[30,1]],
+                    [stock:s2,[40,3]],
+                    [stock:s3,[30,4]],
+                    [stock:s4,[20,2]]},
+                {stock:s2, stock:s3, stock:s4}  ]
+            
+          }.
 
 dec_p_type(sim_init_noActions(actions, set(stock), algstate, int)).
 sim_init_noActions(MarketActions, ActualActions, State, Check):-
@@ -604,7 +643,7 @@ sim_init_noActions(MarketActions, ActualActions, State, Check):-
 dec_p_type(sim_init_3Actions(actions, set(stock), algstate, int)).
 sim_init_3Actions(MarketActions, ActualActions, State, Check):-
     % Empezamos con 3 acciones que ya valen mucho (ej. 100)
-    MarketActions = {[stock:s1,[50,1]], [stock:s2,[30,1]], [stock:s4,[20,1]]} &
-    ActualActions = {stock:s1, stock:s2, stock:s4} & 
+    MarketActions = {[stock:s1,[40,3]], [stock:s2,[30,2]], [stock:s3,[30,4]], [stock:s4,[10,1]]} &
+    ActualActions = {stock:s1, stock:s2, stock:s3} & 
     State = analyzing &
     Check = 0.

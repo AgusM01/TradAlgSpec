@@ -1,0 +1,24 @@
+type_check & reset_types & consult('TradAlg.slog').
+vcg('TradAlg.slog').
+consult('TradAlg-vc.slog').
+check_vcs_TradAlg.
+setpp(q).
+
+
+check_vcs_TradAlg(tryp(prover_all)).
+
+% Simulaciones NEXT:
+                                                            def_type(actions, rel(stock, [value,alpha])).
+
+Termina con error por falta de fondos:
+[sim_init_3Actions]:[invAlg] >> actActions(NewMktActions:{[stock:s1,[50,4]],[stock:s2,[30,3]],[stock:s3,[10,1]],[stock:s4,[20,2]]})
+                             >> actActions(NewMktActions:{[stock:s1,[60,4]],[stock:s2,[10,1]],[stock:s3,[20,3]],[stock:s4,[20,2]]}) 
+                             >> actActions(NewMktActions:{[stock:s1,[10,1]],[stock:s2,[40,3]],[stock:s3,[30,4]],[stock:s4,[30,2]]}) 
+                             >> checkMarket
+                             >> buyActions.
+Termina con compra ok:
+[sim_init_3Actions]:[invAlg] >> actActions(NewMktActions:{[stock:s1,[50,4]],[stock:s2,[30,3]],[stock:s3,[10,1]],[stock:s4,[20,2]]})
+                             >> actActions(NewMktActions:{[stock:s1,[60,4]],[stock:s2,[10,1]],[stock:s3,[20,3]],[stock:s4,[20,2]]}) 
+                             >> actActions(NewMktActions:{[stock:s1,[30,1]],[stock:s2,[40,3]],[stock:s3,[30,4]],[stock:s4,[20,2]]}) 
+                             >> checkMarket
+                             >> buyActions.
